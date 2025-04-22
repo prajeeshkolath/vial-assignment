@@ -31,13 +31,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    command: npm run dev
+    command: npx serve -s dist
+    # command: npm run dev
     env_file:
       - ./frontend/.env
     volumes:
       - ./frontend:/usr/app/frontend
       - /usr/app/frontend/node_modules
+      - /usr/app/frontend/dist
     ports:
-      - 5173:5173
+      - 3000:3000
     depends_on:
       - nodeserver

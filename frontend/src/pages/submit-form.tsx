@@ -33,12 +33,14 @@ interface IForm {
     question: string;
     required?: boolean;
     answerChoices?: Array<{ value: string; option: string }>;
-  }>;
+  }>
 }
 
 const FillFormPage: React.FC = () => {
   const { formId } = useParams<{ formId: string }>(); // Get form ID from the URL
-  const [form, setForm] = useState<IForm>({} as IForm);
+  const [form, setForm] = useState<IForm>(
+    {} as IForm
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [responses, setResponses] = useState<Array<IResponse>>([]); // Store user responses
   const [errors, setErrors] = useState<{ [key: number]: string }>({}); // Track validation errors
@@ -61,6 +63,7 @@ const FillFormPage: React.FC = () => {
     const fetchForm = async () => {
       setIsLoading(true);
       try {
+        console.log("Fetching form details for ID:", formId);
         const response = await fetch(`${API_HOST}/forms/${formId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch form details");
@@ -74,8 +77,8 @@ const FillFormPage: React.FC = () => {
               type: string;
               question: string;
               required?: boolean;
-            }) => ({ question: question.question, answer: "" }),
-          ),
+            }) => ({ question: question.question, answer: "" })
+          )
         ); // Initialize responses array
       } catch (error) {
         console.error("Error fetching form details:", error);
@@ -88,12 +91,12 @@ const FillFormPage: React.FC = () => {
   }, [formId]);
 
   // Handle input change
-  const handleInputChange = (index: number, value: string) => {
+  const handleInputChange = (index: number, value: string ) => {
     console.log("Input changed:", index, value);
     setResponses((prevResponses) =>
       prevResponses.map((response, i) =>
-        i === index ? { ...response, answer: value } : response,
-      ),
+        i === index ? { ...response, answer: value } : response
+      )
     );
 
     // Clear error when the user starts typing/selecting
@@ -196,7 +199,7 @@ const FillFormPage: React.FC = () => {
         sx={{ width: "100%", mx: "auto", mt: 10 }}
       >
         <Typography variant="h4" gutterBottom>
-          {form.name}...
+          {form.name}
         </Typography>
 
         {/* Snackbar for Success/Error Messages */}
@@ -216,17 +219,14 @@ const FillFormPage: React.FC = () => {
         </Snackbar>
 
         <Stack spacing={3}>
-          {form.questions.map((question, index) => (
+          {form.questions?.map((question, index) => (
             <Box key={index}>
+             
               {question.type === "text" && (
                 <TextField
                   fullWidth
-                  label={question.question}
-                  onChange={(
-                    e: React.ChangeEvent<
-                      HTMLInputElement | HTMLTextAreaElement
-                    >,
-                  ) => handleInputChange(index, e.target.value)}
+                  label={question.required ? `${question.question} *` : question.question}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => handleInputChange(index, e.target.value)}
                   error={!!errors[index]} // Show error if validation fails
                   helperText={errors[index]} // Display error message
                 />
@@ -236,20 +236,16 @@ const FillFormPage: React.FC = () => {
                   fullWidth
                   multiline
                   rows={4}
-                  label={question.question}
-                  onChange={(e) =>
-                    handleInputChange(index, e.target.value as string)
-                  }
+                  label={question.required ? `${question.question} *` : question.question}
+                  onChange={(e) => handleInputChange(index, e.target.value as string)}
                   error={!!errors[index]} // Show error if validation fails
                   helperText={errors[index]} // Display error message
                 />
               )}
               {question.type === "datetime" && (
                 <DateTimePicker
-                  label={question.question}
-                  onChange={(value) =>
-                    handleInputChange(index, value ? value.toString() : "")
-                  }
+                  label={question.required ? `${question.question} *` : question.question}
+                  onChange={(value) => handleInputChange(index, value ? value.toString() : "")}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -262,22 +258,18 @@ const FillFormPage: React.FC = () => {
               {question.type === "dropdown" && (
                 <FormControl fullWidth error={!!errors[index]}>
                   <InputLabel id={`dropdown-label-${index}`}>
-                    {question.question}
+                  {question.required ? `${question.question} *` : question.question}
                   </InputLabel>
                   <Select
                     labelId={`dropdown-label-${index}`}
-                    onChange={(e) =>
-                      handleInputChange(index, e.target.value as string)
-                    }
+                    onChange={(e) => handleInputChange(index, e.target.value as string)}
                     displayEmpty
                   >
-                    {question.answerChoices?.map(
-                      (choice: { value: string; option: string }) => (
-                        <MenuItem key={choice.value} value={choice.value}>
-                          {choice.option}
-                        </MenuItem>
-                      ),
-                    )}
+                    {question.answerChoices?.map((choice: {value: string, option: string}) => (
+                      <MenuItem key={choice.value} value={choice.value}>
+                        {choice.option}
+                      </MenuItem>
+                    ))}
                   </Select>
                   {!!errors[index] && (
                     <FormHelperText>{errors[index]}</FormHelperText>
