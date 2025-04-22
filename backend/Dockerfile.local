@@ -1,0 +1,12 @@
+FROM node:18 as development
+
+WORKDIR /usr/app/backend
+
+COPY package.json ./
+COPY package-lock.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npx prisma generate
